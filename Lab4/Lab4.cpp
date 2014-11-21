@@ -12,5 +12,5 @@ LAB4_API Record* Search(char* surname)
 
 LAB4_API void Change(Record oldRecord, Record newRecord)
 {
-	int a = 45;
+	int a = 42;
 }
