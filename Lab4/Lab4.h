@@ -10,13 +10,20 @@
 #define LAB4_API __declspec(dllimport)
 #endif
 
-// This class is exported from the Lab4.dll
-class LAB4_API CLab4 {
-public:
-	CLab4(void);
-	// TODO: add your methods here.
+
+struct LAB4_API  Record
+{
+	char* Surname;
+	char* Name;
+	char* SecName;
+	int PhoneNumber;
+	char* Streat;
+	int House;
+	int Building;
+	int Flat;
 };
 
-extern LAB4_API int nLab4;
+LAB4_API Record* Search(char* surname);
 
-LAB4_API int fnLab4(void);
+LAB4_API void Change(Record oldRecord, Record newRecord);
+

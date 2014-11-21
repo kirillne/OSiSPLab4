@@ -5,18 +5,12 @@
 #include "Lab4.h"
 
 
-// This is an example of an exported variable
-LAB4_API int nLab4=0;
-
-// This is an example of an exported function.
-LAB4_API int fnLab4(void)
+LAB4_API Record* Search(char* surname)
 {
-	return 42;
+	return NULL;
 }
 
-// This is the constructor of a class that has been exported.
-// see Lab4.h for the class definition
-CLab4::CLab4()
+LAB4_API void Change(Record oldRecord, Record newRecord)
 {
-	return;
+
 }
