@@ -13,17 +13,23 @@
 
 struct LAB4_API  Record
 {
-	char* Surname;
-	char* Name;
-	char* SecName;
+	std::string Surname;
+	std::string Name;
+	std::string SecName;
 	int PhoneNumber;
-	char* Streat;
+	std::string Streat;
 	int House;
 	int Building;
 	int Flat;
+	int Index;
 };
 
-LAB4_API Record* Search(char* surname);
+LAB4_API void Search(char* surname, Record* buf);
 
 LAB4_API void Change(Record oldRecord, Record newRecord);
+
+LAB4_API void Add(Record record);
+
+LAB4_API void Delete(Record record);
+
 
