@@ -81,12 +81,26 @@ BOOL ReadLine(HANDLE hFile, char *pszBuffer, DWORD dwSize)
 	return TRUE;
 }
 
+
+int ReadElement(char *element, char* string, int start)
+{
+	int i = start;
+	int elementIndex = 0;
+	while (string[i] != ';')
+	{
+		element[elementIndex++] = string[i++];
+	}
+	element[elementIndex] = 0;
+	return i + 1;
+}
+
 void OpenDatabase()
 {
 	HANDLE hFile;
-	hFile = CreateFile(TEXT("telbase.txt"), GENERIC_READ,  0,   NULL, OPEN_EXISTING,  FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = CreateFile(TEXT("E:\\telbase.txt"), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
+		int i = GetLastError();
 		SetLastError(ERROR_FILE_INVALID);
 		return;
 	}
@@ -98,12 +112,13 @@ void OpenDatabase()
 	int size = 255;
 	while (ReadLine(hFile, string, size))
 	{
+		if (string[0] == 0) continue;
 		char element[255];
 		int elementStart = 0;
 		Record record;
 		
 		elementStart = ReadElement(element, string, elementStart);
-		record.Index = atoi(element);
+		record.PhoneNumber = atoi(element);
 
 		elementStart = ReadElement(element, string, elementStart);
 		record.Surname = std::string(element);
@@ -134,17 +149,7 @@ void OpenDatabase()
 	CloseHandle(hFile);
 }
 
-int ReadElement(char *element, char* string, int start)
-{
-	int i = start;
-	int elementIndex = 0;
-	while (string[i] != ';') 
-	{
-		element[elementIndex++] = string[i++];
-	}
-	element[elementIndex] = 0;
-	return i+1;
-}
+
 
 void CloseDatabase()
 {
@@ -153,9 +158,20 @@ void CloseDatabase()
 	databaseOpened = false;
 }
 
-LAB4_API void Search(char* surname, Record* buf)
+LAB4_API int Search(char* surname, Record* buf)
 {
-	return;
+	if (databaseOpened)
+	{
+		int indexes[255];
+		hashTable->GetIndex(std::string(surname), indexes);
+		int i = 0;
+		while (indexes[i] != -1)
+		{
+			buf[i] = dataBase->at(indexes[i]);
+			i++;
+		}
+		return i;
+	}
 }
 
 LAB4_API void Change(Record oldRecord, Record newRecord)

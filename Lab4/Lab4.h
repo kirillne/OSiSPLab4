@@ -21,10 +21,9 @@ struct LAB4_API  Record
 	int House;
 	int Building;
 	int Flat;
-	int Index;
 };
 
-LAB4_API void Search(char* surname, Record* buf);
+LAB4_API int Search(char* surname, Record* buf);
 
 LAB4_API void Change(Record oldRecord, Record newRecord);
 
