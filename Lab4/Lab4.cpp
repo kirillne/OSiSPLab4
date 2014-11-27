@@ -256,10 +256,27 @@ LAB4_API void Change(Record oldRecord, Record newRecord)
 
 LAB4_API void Add( Record record)
 {
-	int a = 42;
+	if (databaseOpened)
+	{
+		dataBase->push_back(record);
+		RewriteDatabase();
+		OpenDatabase();
+	}
 }
 
 LAB4_API void Delete(Record record)
 {
-	int a = 42;
+	if (databaseOpened)
+	{
+		for (std::vector<Record>::iterator it = dataBase->begin(); it != dataBase->end(); it++)
+		{
+			if (it->PhoneNumber == record.PhoneNumber)
+			{
+				dataBase->erase(it);
+				break;  
+			}
+		}
+		RewriteDatabase();
+		OpenDatabase();
+	}
 }

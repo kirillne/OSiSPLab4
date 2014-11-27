@@ -22,16 +22,19 @@ typedef  int(*SearchPhoneType)(int number, Record* buf);
 
 typedef  void (*ChangeType)(Record oldRecord, Record newRecord);
 
-typedef  void AddType(Record record);
+typedef  void(*AddType)(Record record);
 
-typedef  void DeleteType(Record record);
+typedef  void (*DeleteType)(Record record);
 
 SearchSurnameType SearchSurname;
 
 SearchPhoneType SearchPhone;
-
-
 ChangeType Change;
+
+
+AddType Add;
+
+DeleteType Delete;
 
 
 bool LoadDatabaseDLL(void)
@@ -45,6 +48,8 @@ bool LoadDatabaseDLL(void)
 		SearchSurname = (SearchSurnameType)GetProcAddress(hModule, "?SearchSurname@@YAHPADPAURecord@@@Z");
 		SearchPhone = (SearchPhoneType)GetProcAddress(hModule, "?SearchPhoneNumber@@YAHHPAURecord@@@Z");
 		Change = (ChangeType)GetProcAddress(hModule, "?Change@@YAXURecord@@0@Z");
+		Add = (AddType)GetProcAddress(hModule, "?Add@@YAXURecord@@@Z");
+		Delete = (DeleteType)GetProcAddress(hModule, "?Delete@@YAXURecord@@@Z");
 	}
 
 	if (error) {
@@ -70,6 +75,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		std::cout << res[i].PhoneNumber << " " << res[i].Surname << " " << res[i].Name << " " << res[i].SecName << " " << res[i].Streat << " " << res[i].House << " " << res[i].Building << " " << res[i].Flat << std::endl;
 	}
+	std::cout << std::endl;
 	Record newres = res[0];
 	newres.Flat = 15;
 
@@ -80,6 +86,26 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		std::cout << res[i].PhoneNumber << " " << res[i].Surname << " " << res[i].Name << " " << res[i].SecName << " " << res[i].Streat << " " << res[i].House << " " << res[i].Building << " " << res[i].Flat << std::endl;
 	}
+
+	std::cout << std::endl;
+
+	newres.PhoneNumber = 999999;
+	Add(newres);
+	count = SearchPhone(999999, res);
+	for (int i = 0; i < count; i++)
+	{
+		std::cout << res[i].PhoneNumber << " " << res[i].Surname << " " << res[i].Name << " " << res[i].SecName << " " << res[i].Streat << " " << res[i].House << " " << res[i].Building << " " << res[i].Flat << std::endl;
+	}
+	std::cout << std::endl;
+
+	newres.PhoneNumber = 212036;
+	Delete(newres);
+	count = SearchSurname(surname, res);
+	for (int i = 0; i < count; i++)
+	{
+		std::cout << res[i].PhoneNumber << " " << res[i].Surname << " " << res[i].Name << " " << res[i].SecName << " " << res[i].Streat << " " << res[i].House << " " << res[i].Building << " " << res[i].Flat << std::endl;
+	}
+
 	int a;
 	std::cin >> a;
 	return 0;
