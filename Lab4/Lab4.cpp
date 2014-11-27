@@ -13,7 +13,11 @@ void OpenDatabase();
 
 std::vector<Record>* dataBase;
 
-HashTable* hashTable;
+HashTable* surNameHashTable;
+
+HashTable* streatHashTable;
+
+HashTable* phoneNumberHashTable;
 
 
 BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -105,7 +109,9 @@ void OpenDatabase()
 		return;
 	}
 	
-	hashTable = new HashTable();
+	surNameHashTable = new HashTable();
+	streatHashTable = new HashTable();
+	phoneNumberHashTable = new HashTable();
 	dataBase = new std::vector<Record>();
 
 	char string[255];
@@ -143,7 +149,10 @@ void OpenDatabase()
 
 		int index = dataBase->size();
 		dataBase->push_back(record);
-		hashTable->AddElement(record.Surname, index);
+		surNameHashTable->AddElement(record.Surname, index);
+		streatHashTable->AddElement(record.Streat, index);
+		phoneNumberHashTable->AddElement(std::to_string(record.PhoneNumber), index);
+
 	}
 	databaseOpened = true;
 	CloseHandle(hFile);
@@ -153,25 +162,53 @@ void OpenDatabase()
 
 void CloseDatabase()
 {
-	delete hashTable;
+	delete surNameHashTable;
+	delete streatHashTable;
+	delete phoneNumberHashTable;
 	delete dataBase;
 	databaseOpened = false;
 }
 
-LAB4_API int Search(char* surname, Record* buf)
+LAB4_API int SearchSurname(char* surname, Record* buf)
 {
 	if (databaseOpened)
 	{
-		int indexes[255];
-		hashTable->GetIndex(std::string(surname), indexes);
-		int i = 0;
-		while (indexes[i] != -1)
-		{
-			buf[i] = dataBase->at(indexes[i]);
-			i++;
-		}
-		return i;
+		return Search(surname, buf, surNameHashTable);
 	}
+	return 0;
+}
+
+LAB4_API int SearchStreat(char* surname, Record* buf)
+{
+	if (databaseOpened)
+	{
+		return Search(surname, buf, streatHashTable);
+	}
+	return 0;
+}
+
+
+LAB4_API int SearchPhoneNumber(char* surname, Record* buf)
+{
+	if (databaseOpened)
+	{
+		return Search(surname, buf, phoneNumberHashTable);
+	}
+	return 0;
+}
+
+int Search(char* surname, Record* buf, HashTable* hashTable)
+{
+
+	int indexes[255];
+	hashTable->GetIndex(std::string(surname), indexes);
+	int i = 0;
+	while (indexes[i] != -1)
+	{
+		buf[i] = dataBase->at(indexes[i]);
+		i++;
+	}
+	return i;
 }
 
 LAB4_API void Change(Record oldRecord, Record newRecord)

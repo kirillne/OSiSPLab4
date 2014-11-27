@@ -23,7 +23,11 @@ struct LAB4_API  Record
 	int Flat;
 };
 
-LAB4_API int Search(char* surname, Record* buf);
+LAB4_API int SearchSurname(char* surname, Record* buf);
+
+LAB4_API int SearchStreat(char* surname, Record* buf);
+
+LAB4_API int SearchPhoneNumber(char* surname, Record* buf);
 
 LAB4_API void Change(Record oldRecord, Record newRecord);
 
