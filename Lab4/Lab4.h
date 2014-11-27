@@ -27,7 +27,7 @@ LAB4_API int SearchSurname(char* surname, Record* buf);
 
 LAB4_API int SearchStreat(char* surname, Record* buf);
 
-LAB4_API int SearchPhoneNumber(char* surname, Record* buf);
+LAB4_API int SearchPhoneNumber(int number, Record* buf);
 
 LAB4_API void Change(Record oldRecord, Record newRecord);
 

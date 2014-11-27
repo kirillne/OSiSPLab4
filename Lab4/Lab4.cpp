@@ -169,35 +169,7 @@ void CloseDatabase()
 	databaseOpened = false;
 }
 
-LAB4_API int SearchSurname(char* surname, Record* buf)
-{
-	if (databaseOpened)
-	{
-		return Search(surname, buf, surNameHashTable);
-	}
-	return 0;
-}
-
-LAB4_API int SearchStreat(char* surname, Record* buf)
-{
-	if (databaseOpened)
-	{
-		return Search(surname, buf, streatHashTable);
-	}
-	return 0;
-}
-
-
-LAB4_API int SearchPhoneNumber(char* surname, Record* buf)
-{
-	if (databaseOpened)
-	{
-		return Search(surname, buf, phoneNumberHashTable);
-	}
-	return 0;
-}
-
-int Search(char* surname, Record* buf, HashTable* hashTable)
+int Search(const char* surname, Record* buf, HashTable* hashTable)
 {
 
 	int indexes[255];
@@ -211,10 +183,76 @@ int Search(char* surname, Record* buf, HashTable* hashTable)
 	return i;
 }
 
+LAB4_API int SearchSurname(char* surname, Record* buf)
+{
+	if (databaseOpened)
+	{
+		return Search(surname, buf, surNameHashTable);
+	}
+	return 0;
+}
+
+LAB4_API int SearchStreat(char* streat, Record* buf)
+{
+	if (databaseOpened)
+	{
+		return Search(streat, buf, streatHashTable);
+	}
+	return 0;
+}
+
+
+LAB4_API int SearchPhoneNumber(int number, Record* buf)
+{
+	if (databaseOpened)
+	{
+		return Search(std::to_string(number).c_str(), buf, phoneNumberHashTable);
+	}
+	return 0;
+}
+
+
+void RewriteDatabase()
+{
+	if (databaseOpened)
+	{
+		HANDLE hFile;
+		hFile = CreateFile(TEXT("E:\\telbase.txt"), GENERIC_WRITE, 0, NULL,
+			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (hFile == INVALID_HANDLE_VALUE)
+		{
+			int i = GetLastError();
+			SetLastError(ERROR_FILE_INVALID);
+			return;
+		}
+
+		for (std::vector<Record>::const_iterator it = dataBase->begin();
+			it != dataBase->end(); ++it)
+		{
+			std::string text = std::to_string(it->PhoneNumber) + ";" + it->Surname + ";" + it->Name + ";"
+				+ it->SecName + ";" + it->Streat + ";" + std::to_string(it->House) + ";" +
+				std::to_string(it->Building) + ";" + std::to_string(it->Flat) + "\r\n";
+ 			const char* buf = text.c_str();
+			WriteFile(hFile, buf, text.size(), NULL, NULL);
+		}
+		CloseHandle(hFile);
+	}
+}
+
 LAB4_API void Change(Record oldRecord, Record newRecord)
 {
-	int a = 42;
+	if (databaseOpened)
+	{
+		int buf[255];
+		phoneNumberHashTable->GetIndex(std::to_string(oldRecord.PhoneNumber), buf);
+		int index = buf[0];
+		dataBase->operator[](index) = newRecord;
+		RewriteDatabase();
+		OpenDatabase();
+	}
 }
+
+
 
 LAB4_API void Add( Record record)
 {

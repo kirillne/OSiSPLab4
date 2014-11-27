@@ -27,10 +27,10 @@ int HashTable::GetHash(std::string value)
 	int hash = 0;
 	for (int i = 0; i < (value.size() > 3 ? 3 : value.size()); i++)
 	{
-		hash += -(int)(value[i]);
+		hash += (int)(value[i]);
 	}
 	hash %= TABLESIZE;
-	return hash;
+	return hash > -1 ? hash : -hash;
 }
 
 void  HashTable::GetIndex(std::string value, int* buf)

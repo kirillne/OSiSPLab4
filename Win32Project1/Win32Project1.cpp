@@ -16,15 +16,22 @@ typedef struct  Record
 	int Flat;
 };
 
-typedef  int (*SearchType)(char* surname, Record* buf);
+typedef  int (*SearchSurnameType)(char* surname, Record* buf);
 
-typedef  void ChangeType(Record oldRecord, Record newRecord);
+typedef  int(*SearchPhoneType)(int number, Record* buf);
+
+typedef  void (*ChangeType)(Record oldRecord, Record newRecord);
 
 typedef  void AddType(Record record);
 
 typedef  void DeleteType(Record record);
 
-SearchType Search;
+SearchSurnameType SearchSurname;
+
+SearchPhoneType SearchPhone;
+
+
+ChangeType Change;
 
 
 bool LoadDatabaseDLL(void)
@@ -35,8 +42,9 @@ bool LoadDatabaseDLL(void)
 	if (hModule == NULL)
 		error = GetLastError();
 	else {
-		Search = (SearchType)GetProcAddress(hModule, "?Search@@YAHPADPAURecord@@@Z");
-
+		SearchSurname = (SearchSurnameType)GetProcAddress(hModule, "?SearchSurname@@YAHPADPAURecord@@@Z");
+		SearchPhone = (SearchPhoneType)GetProcAddress(hModule, "?SearchPhoneNumber@@YAHHPAURecord@@@Z");
+		Change = (ChangeType)GetProcAddress(hModule, "?Change@@YAXURecord@@0@Z");
 	}
 
 	if (error) {
@@ -52,14 +60,25 @@ bool LoadDatabaseDLL(void)
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	setlocale(LC_ALL, ".1251");
 	LoadDatabaseDLL();
 	Record res[255];
 	int count = 0;
 	char* surname = "блб";
-	count = Search(surname, res);
+	count = SearchSurname(surname, res);
 	for (int i = 0; i < count; i++)
 	{
-		std::cout << res[i].PhoneNumber << " " << res[i].Surname << " " << res[i].Name << " " << res[i].SecName << " " << res[i].Streat << " " << res[i].House << res[i].Building << res[i].Flat << std::endl;
+		std::cout << res[i].PhoneNumber << " " << res[i].Surname << " " << res[i].Name << " " << res[i].SecName << " " << res[i].Streat << " " << res[i].House << " " << res[i].Building << " " << res[i].Flat << std::endl;
+	}
+	Record newres = res[0];
+	newres.Flat = 15;
+
+	Change(res[0], newres);
+
+	count = SearchPhone(212036, res);
+	for (int i = 0; i < count; i++)
+	{
+		std::cout << res[i].PhoneNumber << " " << res[i].Surname << " " << res[i].Name << " " << res[i].SecName << " " << res[i].Streat << " " << res[i].House << " " << res[i].Building << " " << res[i].Flat << std::endl;
 	}
 	int a;
 	std::cin >> a;
