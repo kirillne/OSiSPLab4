@@ -12,7 +12,7 @@ HashTable::HashTable()
 	}
 }
 
-void HashTable::AddElement(std::string value, int index)
+void HashTable::AddElement(std::wstring value, int index)
 {
 	int hash = GetHash(value);
 
@@ -22,7 +22,7 @@ void HashTable::AddElement(std::string value, int index)
 	headers[hash]->push_back(element);
 }
 
-int HashTable::GetHash(std::string value)
+int HashTable::GetHash(std::wstring value)
 {
 	int hash = 0;
 	for (int i = 0; i < (value.size() > 3 ? 3 : value.size()); i++)
@@ -33,14 +33,21 @@ int HashTable::GetHash(std::string value)
 	return hash > -1 ? hash : -hash;
 }
 
-void  HashTable::GetIndex(std::string value, int* buf)
+void  HashTable::GetIndex(std::wstring value, int* buf)
 {
 	int hash = GetHash(value);
 	int foundedCount = 0;
 	for (std::vector<HashTable::ListElement>::const_iterator it = headers[hash]->begin(); 
 		it != headers[hash]->end(); ++it)
 	{
-		if (!std::strncmp(it->Value.c_str(), value.c_str(), value.size()))
+		bool result = true;
+		const TCHAR* elem = it->Value.c_str();
+		const TCHAR* cvalue = value.c_str();
+		for (int i = 0; i < value.size();i++)
+		{
+			if (elem[i] != cvalue[i]) result = false;
+		}
+		if (result)
 		{
 			buf[foundedCount++] = it->Index;
 		}

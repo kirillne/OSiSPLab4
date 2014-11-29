@@ -1,3 +1,4 @@
+
 // Lab4.cpp : Defines the exported functions for the DLL application.
 //
 
@@ -22,6 +23,7 @@ HashTable* phoneNumberHashTable;
 
 BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
+	setlocale(LC_ALL, ".1251");
 	switch (fdwReason)
 	{
 	case DLL_PROCESS_ATTACH:
@@ -42,7 +44,7 @@ BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 	return TRUE;
 }
 
-BOOL ReadLine(HANDLE hFile, char *pszBuffer, DWORD dwSize)
+BOOL ReadLine(HANDLE hFile, TCHAR *pszBuffer, DWORD dwSize)
 {
 	DWORD i, dwRead;
 	
@@ -52,41 +54,42 @@ BOOL ReadLine(HANDLE hFile, char *pszBuffer, DWORD dwSize)
 		return FALSE;
 	}
 
+//	mbstowcs_s(nullptr, pszBuffer, dwSize, charBuf, dwSize);
+
 	for (i = 0; i < dwRead; i++)
 	{
-		BYTE c = ((BYTE *)pszBuffer)[i];
-		if (c == '\r')
+		if (pszBuffer[i] == '\r')
 		{
-			((BYTE *)pszBuffer)[i] = 0;
-			if (i + 1 < dwRead && ((BYTE *)pszBuffer)[i + 1] == '\n')
+			pszBuffer[i] = 0;
+			if (i + 1 < dwRead && pszBuffer[i + 1] == '\n')
 			{
 				i++;
 			}
 			break;
 		}
-		else if (c == '\n')
+		else if (pszBuffer[i] == '\n')
 		{
-			((BYTE *)pszBuffer)[i] = 0;
+			pszBuffer[i] = 0;
 			break;
 		}
 	}
 
 	if (i >= dwRead)
 	{
-		((BYTE *)pszBuffer)[i] = 0;
+		pszBuffer[i] = 0;
 	}
 	else
 	{
 		i++;
 	}
 
-	SetFilePointer(hFile, i - dwRead, NULL, FILE_CURRENT);
+	SetFilePointer(hFile, i*2 - dwRead, NULL, FILE_CURRENT);
 
 	return TRUE;
 }
 
 
-int ReadElement(char *element, char* string, int start)
+int ReadElement(TCHAR *element, TCHAR* string, int start)
 {
 	int i = start;
 	int elementIndex = 0;
@@ -114,44 +117,44 @@ void OpenDatabase()
 	phoneNumberHashTable = new HashTable();
 	dataBase = new std::vector<Record>();
 
-	char string[255];
+	TCHAR string[255];
 	int size = 255;
 	while (ReadLine(hFile, string, size))
 	{
 		if (string[0] == 0) continue;
-		char element[255];
+		TCHAR element[255];
 		int elementStart = 0;
 		Record record;
 		
 		elementStart = ReadElement(element, string, elementStart);
-		record.PhoneNumber = atoi(element);
+		record.PhoneNumber = _wtoi(element);
 
 		elementStart = ReadElement(element, string, elementStart);
-		record.Surname = std::string(element);
+		record.Surname = std::wstring(element);
 
 		elementStart = ReadElement(element, string, elementStart);
-		record.Name = std::string(element);
+		record.Name = std::wstring(element);
 
 		elementStart = ReadElement(element, string, elementStart);
-		record.SecName = std::string(element);
+		record.SecName = std::wstring(element);
 
 		elementStart = ReadElement(element, string, elementStart);
-		record.Streat = std::string(element);
+		record.Streat = std::wstring(element);
 
 		elementStart = ReadElement(element, string, elementStart);
-		record.House = atoi(element);
+		record.House = _wtoi(element);
 
 		elementStart = ReadElement(element, string, elementStart);
-		record.Building = atoi(element);
+		record.Building = _wtoi(element);
 
 		elementStart = ReadElement(element, string, elementStart);
-		record.Flat = atoi(element);
+		record.Flat = _wtoi(element);
 
 		int index = dataBase->size();
 		dataBase->push_back(record);
 		surNameHashTable->AddElement(record.Surname, index);
 		streatHashTable->AddElement(record.Streat, index);
-		phoneNumberHashTable->AddElement(std::to_string(record.PhoneNumber), index);
+		phoneNumberHashTable->AddElement(std::to_wstring(record.PhoneNumber), index);
 
 	}
 	databaseOpened = true;
@@ -169,11 +172,11 @@ void CloseDatabase()
 	databaseOpened = false;
 }
 
-int Search(const char* surname, Record* buf, HashTable* hashTable)
+int Search(const TCHAR* surname, Record* buf, HashTable* hashTable)
 {
 
 	int indexes[255];
-	hashTable->GetIndex(std::string(surname), indexes);
+	hashTable->GetIndex(std::wstring(surname), indexes);
 	int i = 0;
 	while (indexes[i] != -1)
 	{
@@ -183,7 +186,7 @@ int Search(const char* surname, Record* buf, HashTable* hashTable)
 	return i;
 }
 
-LAB4_API int SearchSurname(char* surname, Record* buf)
+LAB4_API int SearchSurname(const TCHAR* surname, Record* buf)
 {
 	if (databaseOpened)
 	{
@@ -192,7 +195,7 @@ LAB4_API int SearchSurname(char* surname, Record* buf)
 	return 0;
 }
 
-LAB4_API int SearchStreat(char* streat, Record* buf)
+LAB4_API int SearchStreat(const TCHAR* streat, Record* buf)
 {
 	if (databaseOpened)
 	{
@@ -206,7 +209,7 @@ LAB4_API int SearchPhoneNumber(int number, Record* buf)
 {
 	if (databaseOpened)
 	{
-		return Search(std::to_string(number).c_str(), buf, phoneNumberHashTable);
+		return Search(std::to_wstring(number).c_str(), buf, phoneNumberHashTable);
 	}
 	return 0;
 }
@@ -229,11 +232,11 @@ void RewriteDatabase()
 		for (std::vector<Record>::const_iterator it = dataBase->begin();
 			it != dataBase->end(); ++it)
 		{
-			std::string text = std::to_string(it->PhoneNumber) + ";" + it->Surname + ";" + it->Name + ";"
-				+ it->SecName + ";" + it->Streat + ";" + std::to_string(it->House) + ";" +
-				std::to_string(it->Building) + ";" + std::to_string(it->Flat) + "\r\n";
- 			const char* buf = text.c_str();
-			WriteFile(hFile, buf, text.size(), NULL, NULL);
+			std::wstring text = std::to_wstring(it->PhoneNumber) + L";" + it->Surname + L";" + it->Name + L";"
+				+ it->SecName + L";" + it->Streat + L";" + std::to_wstring(it->House) + L";" +
+				std::to_wstring(it->Building) + L";" + std::to_wstring(it->Flat) + L"\r\n";
+ 			const TCHAR* buf = text.c_str();
+			WriteFile(hFile, buf, text.size()*sizeof(TCHAR), NULL, NULL);
 		}
 		CloseHandle(hFile);
 	}
@@ -244,7 +247,7 @@ LAB4_API void Change(Record oldRecord, Record newRecord)
 	if (databaseOpened)
 	{
 		int buf[255];
-		phoneNumberHashTable->GetIndex(std::to_string(oldRecord.PhoneNumber), buf);
+		phoneNumberHashTable->GetIndex(std::to_wstring(oldRecord.PhoneNumber), buf);
 		int index = buf[0];
 		dataBase->operator[](index) = newRecord;
 		RewriteDatabase();
@@ -279,4 +282,4 @@ LAB4_API void Delete(Record record)
 		RewriteDatabase();
 		OpenDatabase();
 	}
-}
+}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

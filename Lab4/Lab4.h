@@ -5,27 +5,29 @@
 // LAB4_API functions as being imported from a DLL, whereas this DLL sees symbols
 // defined with this macro as being exported.
 #ifdef LAB4_EXPORTS
-#define LAB4_API __declspec(dllexport)
+#define LAB4_API  __declspec(dllexport)
 #else
-#define LAB4_API __declspec(dllimport)
+#define LAB4_API  __declspec(dllimport)
 #endif
 
+#include <string>
+#include <tchar.h>
 
 struct LAB4_API  Record
 {
-	std::string Surname;
-	std::string Name;
-	std::string SecName;
+	std::wstring Surname;
+	std::wstring Name;
+	std::wstring SecName;
 	int PhoneNumber;
-	std::string Streat;
+	std::wstring Streat;
 	int House;
 	int Building;
 	int Flat;
 };
 
-LAB4_API int SearchSurname(char* surname, Record* buf);
-
-LAB4_API int SearchStreat(char* surname, Record* buf);
+LAB4_API int SearchSurname(const TCHAR* surname, Record* buf);
+ 
+LAB4_API int SearchStreat(const TCHAR* surname, Record* buf);
 
 LAB4_API int SearchPhoneNumber(int number, Record* buf);
 

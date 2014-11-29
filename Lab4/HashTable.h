@@ -5,14 +5,14 @@ public:
 	struct ListElement
 	{
 		int Index;
-		std::string Value;
+		std::wstring Value;
 	};
 	HashTable();
 	~HashTable();
-	void AddElement(std::string value, int index);
-	void GetIndex(std::string value, int* buf);
+	void AddElement(std::wstring value, int index);
+	void GetIndex(std::wstring value, int* buf);
 private:
 	std::vector<ListElement>** headers;
-	int GetHash(std::string value);
+	int GetHash(std::wstring value);
 };
 
